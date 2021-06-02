@@ -57,7 +57,6 @@ export class AppComponent {
 	maxLineLength: number = 30;
 
 	startNewRound(content: string) : void{
-		if(content.length > 200)this.requestNextRound();
 		this.chars = [];
 		this.loadString(content);
 		this.cursorpos = 0;

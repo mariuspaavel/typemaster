@@ -25,14 +25,14 @@ export class AppComponent {
 		return Math.round(this.wpm).toString();
 	}	
 	
-	correct = new Audio("assets/correct.wav");
-	wrong = new Audio("assets/wrong.wav");
+	correct = new Audio("../assets/correct.wav");
+	wrong = new Audio("../assets/wrong.wav");
 
 	constructor() {	
 	}
 
 	ngOnInit(): void {
-		this.startNewRound("Uwugoddessa");
+		this.requestNextRound();
 	}
 
 	loadString(content: string) : void{
@@ -47,7 +47,7 @@ export class AppComponent {
 		this.calculateWpm();
 		var me = this;
 		var xhr = new XMLHttpRequest();
-		xhr.open("GET", "http://95.179.136.134/keyboardwarrior/next", true);
+		xhr.open("GET", "/keyboardwarrior/next", true);
 		xhr.onload = function(e){
 			me.startNewRound(xhr.responseText);
 		}
@@ -122,6 +122,7 @@ export class AppComponent {
 					}
 					this.chars[i].state = 1;
 					this.cursorpos = i+1;
+					if(this.cursorpos >= this.chars.length)this.requestNextRound();
 					return;
 				}
 			}

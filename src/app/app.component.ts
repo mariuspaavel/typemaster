@@ -25,8 +25,8 @@ export class AppComponent {
 		return Math.round(this.wpm).toString();
 	}	
 	
-	correct = new Audio("/assets/correct.wav");
-	wrong = new Audio("/assets/wrong.wav");
+	correct = new Audio("assets/correct.wav");
+	wrong = new Audio("assets/wrong.wav");
 
 	constructor() {	
 	}

@@ -1,0 +1,39 @@
+@font-face {
+font-family: "Terminus";
+src: url("/assets/terminusbold.ttf");
+}
+
+body{
+	width: 100vw;
+	height: 100vh;
+	font-family: Terminus, Arial;
+	font-size: 2rem;
+	position: relative;
+}
+.typewindow{
+	width: 40rem;
+	height: 10rem;
+	font-size: 2rem;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	border-style: solid;
+	border-width: 0.3rem;
+	border-color: #000;
+}
+.char{
+	margin: 0;
+	padding: 0;
+	position: absolute;
+	top: 50%;
+	transform: translate(0, -50%);
+}
+.wpm{
+	position: absolute;
+	margin: 0;
+	padding: 0;
+	top: -5rem;
+	left: 3rem;
+	text-size: 3rem;
+}

@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "keyboardwarrior": {
+    "typemaster": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:application": {
@@ -17,7 +17,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/keyboardwarrior",
+            "outputPath": "dist/typemaster",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
@@ -65,18 +65,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "keyboardwarrior:build"
+            "browserTarget": "typemaster:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "keyboardwarrior:build:production"
+              "browserTarget": "typemaster:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "keyboardwarrior:build"
+            "browserTarget": "typemaster:build"
           }
         },
         "test": {
@@ -113,16 +113,16 @@
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
             "protractorConfig": "e2e/protractor.conf.js",
-            "devServerTarget": "keyboardwarrior:serve"
+            "devServerTarget": "typemaster:serve"
           },
           "configurations": {
             "production": {
-              "devServerTarget": "keyboardwarrior:serve:production"
+              "devServerTarget": "typemaster:serve:production"
             }
           }
         }
       }
     }
   },
-  "defaultProject": "keyboardwarrior"
+  "defaultProject": "typemaster"
 }

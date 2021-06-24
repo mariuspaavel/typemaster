@@ -7,7 +7,7 @@ import { CoreService } from './core.service';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  	title = 'keyboardwarrior';
+  	title = 'typemaster';
 	constructor(coreservice: CoreService) {	
 	}
 

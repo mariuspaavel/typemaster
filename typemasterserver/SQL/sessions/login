@@ -11,7 +11,7 @@ DECLARE
 BEGIN 
 	SELECT accountid, pwhash FROM accounts INTO rec WHERE contact=acontact;
 	IF NOT FOUND THEN
-		RAISE 'Contact not found' USING ERRCODE='contact_not_found';
+		RAISE 'Email not found' USING ERRCODE='email_not_found';
 	END IF;
 	IF MD5(apassword) <> rec.pwhash THEN
 		RAISE 'Wrong password' USING ERRCODE='wrong_password';

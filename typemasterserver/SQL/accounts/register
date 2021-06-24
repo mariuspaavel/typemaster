@@ -5,23 +5,18 @@ RETURNS INTEGER
 LANGUAGE plpgsql
 AS $$
 DECLARE
-	abirth BIGINT;
-	acontact VARCHAR(50);
-	aname VARCHAR(20);
-	agender VARCHAR(1);
+	aemail VARCHAR(50);
 	apassword VARCHAR(32);
 	hash VARCHAR(32);
 	aaccountid INTEGER;	
 
 BEGIN
-	IF EXISTS (SELECT 1 FROM accounts WHERE contact=acontact) THEN
-		RAISE 'Contact occupied' USING ERRCODE='contact_occupied';
+	IF EXISTS (SELECT 1 FROM accounts WHERE email=aemail) THEN
+		RAISE 'Email occupied' USING ERRCODE='email_occupied';
 	END IF;
-	SELECT birth, contact, name, gender, password INTO abirth, acontact, aname, agender, apassword FROM regforms WHERE sessionid=asessionid;	
+	SELECT email, password INTO aemail, apassword FROM regforms WHERE sessionid=asessionid;	
 	hash := MD5(apassword);
-	INSERT INTO accounts(birth, contact, name, gender, pwhash) VALUES (abirth, acontact, aname, agender, hash) RETURNING accountid INTO aaccountid;
+	INSERT INTO accounts(email, pwhash) VALUES (aemail, hash) RETURNING accountid INTO aaccountid;
 	DELETE FROM regforms WHERE sessionid = asessionid;
 	RETURN aaccountid;
 END; $$;
-
-

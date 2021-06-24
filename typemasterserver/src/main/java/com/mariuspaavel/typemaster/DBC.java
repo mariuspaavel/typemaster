@@ -22,7 +22,7 @@ public class DBC{
 
 	private DBC(){
 		String dbPassword = null;
-		try(FileInputStream fs = new FileInputStream("/opt/dapp/dbpassword")){
+		try(FileInputStream fs = new FileInputStream("/opt/typemaster/dbpassword")){
 			StringBuilder sb = new StringBuilder();
 			int c;
 			while((c = fs.read()) != -1)sb.append((char)c);
@@ -36,7 +36,7 @@ public class DBC{
 		}
 		try{
 			Class.forName("org.postgresql.Driver");
-			final String url = "jdbc:postgresql://localhost:5432/dapp";
+			final String url = "jdbc:postgresql://localhost:5432/typemaster";
 			c = DriverManager.getConnection(url, "tomcat", dbPassword);
 		}catch(Exception e){
 			e.printStackTrace(ds);

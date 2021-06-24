@@ -6,19 +6,11 @@ CREATE TABLE regforms (
 		BIGINT
 		DEFAULT (extract(epoch from now()) * 1000) 
 		NOT NULL, 
-	birth 
-		BIGINT,
-	contact 
+	email 
 		varchar(50)  
-		UNIQUE,
-	name 
-		varchar(20), 
-	gender 
-		varchar(1), 
+		UNIQUE, 
 	password 
-		varchar(32),
-	CHECK (birth > -1577921940000),
-	CHECK (gender = 'M' OR gender = 'F')
+		varchar(32)
 );
 
 

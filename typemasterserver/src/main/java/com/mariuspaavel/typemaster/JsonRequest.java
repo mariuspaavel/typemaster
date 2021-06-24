@@ -50,11 +50,11 @@ public class JsonRequest extends HttpServlet{
 		try{
 			Object result = JsonRequestHandler.getInstance().handle(session, (Map<String, Object>)input);
 			if(result != null)output.put("result", result);
-			output.put("responsestatus", "success");	
+			output.put("type", "success");	
 		}catch(SQLException e){
 			e.printStackTrace(ds);
 
-			output.put("responsestatus", "fail");
+			output.put("type", "fail");
 			/*
 			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 			PrintStream errorPrinter = new PrintStream(buffer);
@@ -72,8 +72,8 @@ public class JsonRequest extends HttpServlet{
 		}catch(Exception e){
 
 			e.printStackTrace(ds);
-			output.put("responsestatus", "fail");
-			output.put("cause", e.getMessage());
+			output.put("type", "fail");
+			output.put("message", e.getMessage());
 
 		}
 		json.write(output, out);		

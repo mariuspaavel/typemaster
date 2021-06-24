@@ -1,0 +1,36 @@
+.formframe{
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	font-family: Terminus, Arial;
+	font-size: 1.5rem;
+	border-width: 0.25rem;
+	border-style: solid;
+	border-color: black;	
+	padding: 1rem;
+}
+.formframe>*{
+	margin: 1rem;
+}
+
+p{
+	font-size: 2rem;
+}
+button, input{
+	font-family: inherit;
+	font-size: inherit;
+	border-width: inherit;
+	border-color: inherit;
+}
+button:hover{
+	background-color: #AAA;
+}
+input{
+	min-width: 18rem;
+}
+.errormessage{
+	position: absolute;
+	top: 0;
+	right: 1rem;
+}

@@ -1,39 +1,27 @@
 @font-face {
-font-family: "Terminus";
-src: url("../assets/terminusbold.ttf");
+	font-family: "Terminus";
+	src: url("/assets/terminusbold.ttf");
 }
 
-body{
+
+container{
 	width: 100vw;
 	height: 100vh;
-	font-family: Terminus, Arial;
-	font-size: 2rem;
 	position: relative;
+	font-family: Terminus, Arial;
 }
-.typewindow{
-	width: 40rem;
-	height: 10rem;
-	font-size: 2rem;
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
+*{
+	font-family: Terminus, Arial;
+	font-size: 1.5rem;
+}
+button{
 	border-style: solid;
-	border-width: 0.3rem;
-	border-color: #000;
+	border-width: 0.25rem;
+	border-color: black;
 }
-.char{
-	margin: 0;
-	padding: 0;
-	position: absolute;
-	top: 50%;
-	transform: translate(0, -50%);
+button:hover{
+	background-color: #AAA;
 }
-.wpm{
-	position: absolute;
-	margin: 0;
-	padding: 0;
-	top: -5rem;
-	left: 3rem;
-	text-size: 3rem;
+button:active{
+	background-color: #999;
 }

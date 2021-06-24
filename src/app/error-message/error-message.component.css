@@ -1,0 +1,8 @@
+.errormessage{
+	width: 100%;
+	height: 100%;
+	color: #FF3333;
+	font-family: Terminus, Arial;
+	margin: 1rem, 0;
+	font-weight: bold;
+}

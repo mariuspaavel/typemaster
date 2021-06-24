@@ -1,0 +1,11 @@
+CREATE OR REPLACE FUNCTION validate(
+	asessionid INTEGER,
+	asessionkey BIGINT
+)
+RETURNS SETOF sessions
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	RETURN QUERY SELECT * FROM sessions WHERE sessionid=asessionid AND sessionkey=asessionkey;
+END;
+$$;

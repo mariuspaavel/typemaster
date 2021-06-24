@@ -1,0 +1,14 @@
+CREATE OR REPLACE FUNCTION getmaxcoverpos(
+	aacountid INTEGER
+)
+RETURNS INTEGER
+LANGUAGE plpgsql
+AS $$
+DECLARE
+maxpos INTEGER;
+BEGIN
+	SELECT MAX(position) INTO maxpos FROM covers WHERE accountid=aacountid;
+	IF maxpos IS NULL THEN maxpos := 0; END IF;
+	RETURN maxpos;
+END;
+$$;

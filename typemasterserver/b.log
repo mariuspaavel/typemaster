@@ -1,0 +1,34 @@
+:compileJava/home/marius/datingapp/server/src/main/java/com/mariuspaavel/datingapp/GetMedia.java:8: error: cannot find symbol
+@WebServlet("/getmedia")
+ ^
+  symbol: class WebServlet
+/home/marius/datingapp/server/src/main/java/com/mariuspaavel/datingapp/GetMedia.java:23: error: cannot find symbol
+			if(ds != null)ds.println("Requested media #" + mediaId);
+			                                               ^
+  symbol:   variable mediaId
+  location: class GetMedia
+/home/marius/datingapp/server/src/main/java/com/mariuspaavel/datingapp/GetMedia.java:24: error: incompatible types: Object cannot be converted to byte[]
+			byte[] bytes = DBC.getInstance().callFunction("getmedia", mediaid);
+			                                             ^
+/home/marius/datingapp/server/src/main/java/com/mariuspaavel/datingapp/JsonRequest.java:66: error: cannot find symbol
+				put("responsestatus", trimmedmessage);
+				                      ^
+  symbol: variable trimmedmessage
+Note: Some input files use unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+4 errors
+ FAILED
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':compileJava'.
+> Compilation failed; see the compiler error output for details.
+
+* Try:
+Run with --stacktrace option to get the stack trace. Run with --info or --debug option to get more log output. Run with --scan to get full insights.
+
+* Get more help at https://help.gradle.org
+
+BUILD FAILED in 1s
+1 actionable task: 1 executed

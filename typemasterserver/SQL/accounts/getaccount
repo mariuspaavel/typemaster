@@ -1,0 +1,10 @@
+CREATE OR REPLACE FUNCTION getaccount(
+	aaccountid INTEGER
+)
+RETURNS SETOF accounts
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	RETURN QUERY SELECT * FROM accounts WHERE accounts.accountid=aaccountid;
+END;
+$$;

@@ -1,0 +1,22 @@
+CREATE TABLE sessions(
+sessionid 
+	SERIAL
+	PRIMARY KEY
+	NOT NULL,
+sessionkey
+	BIGINT
+	DEFAULT (random() * 9223372036854775807)::REAL
+	NOT NULL,
+firstconnect
+	BIGINT
+	DEFAULT extract(epoch FROM now()) * 1000
+	NOT NULL,
+lastconnect
+	BIGINT
+	DEFAULT extract(epoch FROM now()) * 1000
+	NOT NULL,
+accountid
+	INTEGER
+	REFERENCES accounts(accountid)
+	DEFAULT NULL
+);

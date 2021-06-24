@@ -1,0 +1,33 @@
+plugins{
+        id 'java'
+        id 'war'
+}
+
+war{
+        archiveName = 'typemasterserver.war'
+}
+
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+
+  //      compile fileTree(dir: '../libs', include: ['*.jar'])
+	//compile(files("libs/sqlite.jar"))  
+	compile(files("../../JsonLib/build/libs/JsonLib.jar"))
+	compile(files("libs/psql.jar"))
+
+	compile files("../../JavaUtilities/build/libs/JavaUtilities.jar")
+        compileOnly "javax.servlet:javax.servlet-api:3.0.1"
+}
+
+task deploy{
+	dependsOn 'build'
+	doLast{
+		exec{
+			executable './deploy.sh'
+		}
+	}
+}

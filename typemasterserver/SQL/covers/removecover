@@ -1,0 +1,15 @@
+CREATE OR REPLACE FUNCTION removecover(
+	aaccountid INTEGER,
+	acoverid INTEGER
+)
+RETURNS void
+LANGUAGE plpgsql
+AS $$
+DECLARE
+	coverposition INTEGER;
+BEGIN
+	PERFORM checkcoverownership(aacountid, acoverid);
+	DELETE FROM covers WHERE coverid=acoverid RETURNING position INTO coverposition;
+	PERFORM coverpositionshift(aaccountid, coverposition, -1);
+END;
+$$;		

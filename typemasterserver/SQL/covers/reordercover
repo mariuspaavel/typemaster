@@ -1,0 +1,18 @@
+CREATE OR REPLACE FUNCTION reordercover(
+	aaccountid INTEGER,
+	acoverid INTEGER,
+	newposition INTEGER
+)
+RETURNS void
+LANGUAGE plpgsql
+AS $$
+DECLARE
+oldposition INTEGER;
+BEGIN
+	PERFORM checkcoverownership(aaccountid, acoverid);
+	PERFORM coverpositionshift(aaccountid, newposition, 1);
+	SELECT position INTO oldposition FROM covers WHERE coverid=acoverid;
+	UPDATE covers SET position=newposition WHERE coverid=acoverid;
+	PERFORM coverpositionshift(aaccountid, oldposition, -1);
+END;
+$$;

@@ -1,0 +1,24 @@
+CREATE TABLE regforms (
+	sessionid 
+		INTEGER 
+		REFERENCES sessions(sessionid),
+	creationt 
+		BIGINT
+		DEFAULT (extract(epoch from now()) * 1000) 
+		NOT NULL, 
+	birth 
+		BIGINT,
+	contact 
+		varchar(50)  
+		UNIQUE,
+	name 
+		varchar(20), 
+	gender 
+		varchar(1), 
+	password 
+		varchar(32),
+	CHECK (birth > -1577921940000),
+	CHECK (gender = 'M' OR gender = 'F')
+);
+
+

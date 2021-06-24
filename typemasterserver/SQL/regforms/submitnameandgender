@@ -1,0 +1,13 @@
+CREATE OR REPLACE FUNCTION submitnameandgender(
+	asessionid INTEGER, 
+	aname VARCHAR(20),
+	agender VARCHAR(1)
+)
+RETURNS void
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	PERFORM ensureform(asessionid);
+	UPDATE regforms SET name=aname, gender=agender WHERE sessionid=asessionid;
+END;
+$$;

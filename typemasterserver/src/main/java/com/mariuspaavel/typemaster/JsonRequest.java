@@ -20,19 +20,9 @@ public class JsonRequest extends HttpServlet{
 	public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
 		if(ds!=null)ds.println("Received http json request");
 		ClientSession session;
-		try{
-			session = SessionManager.getInstance().authenticate(request, response);
-		}catch(Exception e){
-			e.printStackTrace(ds);	
-			return;
-		}
+	
 		BufferedInputStream is = new BufferedInputStream(request.getInputStream(), 8*1024);
 		InputStreamReader isr = new InputStreamReader(is);
-	
-		BufferedOutputStream os = new BufferedOutputStream(response.getOutputStream(), 8*1024);		
-
-		PrintStream out = new PrintStream(os);
-
 		Object input = null;
 	
 		input = json.read(isr);
@@ -45,6 +35,18 @@ public class JsonRequest extends HttpServlet{
 		}catch(IOException e){
 			ds.println("Couldn't print the input for debugging due to an IOException.");
 		}	
+
+		try{
+			session = SessionManager.getInstance().authenticate(input, request, response);
+		}catch(Exception e){
+			e.printStackTrace(ds);	
+			return;
+		}
+
+	
+		BufferedOutputStream os = new BufferedOutputStream(response.getOutputStream(), 8*1024);		
+
+		PrintStream out = new PrintStream(os);
 
 		Map<String, Object> output = new HashMap<String, Object>();
 		try{
@@ -85,6 +87,37 @@ public class JsonRequest extends HttpServlet{
 	}
 	public void destroy(){
 	
+	}
+
+	private ClientSession validate(String sessionId, String sessionKey)throws SQLException{		
+
+		String query = String.format("SELECT * FROM validate(%d, %d);", sessionId, sessionKey);
+		try(Statement stmt=DBC.getInstance().getConnection().createStatement(); ResultSet rs = stmt.executeQuery(query)){
+			if(!rs.next())return null;
+			ClientSession session = new ClientSession(sessionId, sessionKey);
+			session.setAccountId(rs.getInt("accountid"));
+			return true;
+		}
+	}
+	private void syncCookies(ClientSession session, HttpServletRequest request, HttpServletResponse response){
+		Cookie[] cookies = request.getCookies();
+		String readSessionId = null;
+		String readSessionKey = null;
+		if(cookies != null){
+			for(Cookie c : cookies){
+				if(c.getName().equals("sessionid"))readSessionId = c.getValue();
+				else if(e.getName().equals("sessionkey"))readSessionKey = c.getValue();
+			}
+		}
+		if(
+		readSessionId == null || 
+		readSessionKey == null ||
+		!readSessionId.equals(session.getSessionId()) ||
+		!readSessionKey.equals(session.getSessionKey())
+		){
+			response.setCookie(new Cookie("sessionid", session.getSessionId()));
+			response.setCookie(new Cookie("sessionKey", session.getSessionKey()));
+		}
 	}
 
 }

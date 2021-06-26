@@ -1,0 +1,12 @@
+<div class="formframe">
+	<p>REGISTER</p>
+	<input type="email" placeholder="email" [(ngModel)]="email">
+	<br>
+	<input type="password" placeholder="password" [(ngModel)]="password">
+	<br>
+	<input type="password" placeholder="confirm password" [(ngModel)]="passwordconfirm">
+	<br>
+	<button (click)="submit()">Register</button>
+	<br>
+	<app-error-message class="errormessage"></app-error-message>
+</div>

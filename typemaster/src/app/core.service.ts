@@ -5,12 +5,15 @@ import { Account } from './account.model';
   providedIn: 'root'
 })
 export class CoreService {
-	private account: any = null;	
-	
+	private accountId: number = -1;	
 
 	constructor() { }
 	
-	setAccount(acc: Account): void{
-		this.account = acc;
-	}	
+	getAccount() : number{
+		return this.accountId;
+	}
+	setAccount(accountId: number): void{
+		this.accountId = accountId;
+	}
+		
 }

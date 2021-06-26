@@ -9,16 +9,43 @@ import { CoreService } from './core.service';
 })
 export class ApiconnectionService {
 	
-	private rootUrl: string = "95.179.136.134/keyboardwarrior/";
+	private rootUrl: string = "http://95.179.136.134/typemasterserver/";
 
 	constructor(private http: HttpClient, private coreService: CoreService) { }
 
-	login(email : string, password : string, onSuccess: ()=>void, onFailure: (message: string)=>void): void{
-		this.http.post(this.rootUrl + 'jsonreq', {type: "login", email: email, password: password})
+	login(email : string, password : string, onSuccess: (accountId:number)=>void, onFailure: (message: string)=>void): void{
+		this.http.post(this.rootUrl + 'jsonrequest', {type: "login", email: email, password: password})
 		.subscribe(response => {
 			console.log(response);
 			if((<Response>response).type === "success"){
-				this.coreService.setAccount(<Account>(<Response>response).payload);
+				let accountId: number = <number>(<Response>response).payload;
+				this.coreService.setAccount(accountId);
+				onSuccess(accountId);
+			}else{
+				onFailure(<string>((<Response>response).payload));
+			}
+		});
+	}
+
+	register(email : string, password : string, onSuccess: (accountId:number)=>void, onFailure: (message: string)=>void): void{
+		this.http.post(this.rootUrl + 'jsonrequest', {type: "register", email: email, password: password})
+		.subscribe(response => {
+			console.log(response);
+			if((<Response>response).type === "success"){
+				let accountId: number = <number>(<Response>response).payload;
+				this.coreService.setAccount(accountId);
+				onSuccess(accountId);
+			}else{
+				onFailure(<string>((<Response>response).payload));
+			}
+		});
+	}
+	logout(onSuccess: ()=>void, onFailure: (message: string)=>void) : void{
+		this.http.post(this.rootUrl + 'jsonrequest', {type: "logout"})
+		.subscribe(response => {
+			console.log(response);
+			if((<Response>response).type === "success"){
+				this.coreService.setAccount(-1);
 				onSuccess();
 			}else{
 				onFailure(<string>((<Response>response).payload));

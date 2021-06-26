@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CoreService } from '../core.service';
-import { ApiconnectionService } from '../apiconnection.service';
 
 @Component({
   selector: 'app-bar',
@@ -10,7 +9,7 @@ import { ApiconnectionService } from '../apiconnection.service';
 })
 export class BarComponent implements OnInit {
 
-  constructor(private router: Router, private coreService: CoreService, private apiconnection: ApiconnectionService) { }
+  constructor(private router: Router, private coreService: CoreService) { }
 
   ngOnInit(): void {
   }
@@ -25,6 +24,6 @@ export class BarComponent implements OnInit {
 		this.router.navigate(['/register']);	
 	}
 	logout(): void{
-		this.apiconnection.logout(()=>{}, ()=>{});
+		this.coreService.logout(()=>{}, ()=>{});
 	}
 }

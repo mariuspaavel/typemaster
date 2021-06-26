@@ -1,5 +1,4 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { ApiconnectionService } from '../apiconnection.service';
 import { CoreService } from '../core.service';
 import { ErrorMessageComponent } from '../error-message/error-message.component';
 import { Router } from '@angular/router';
@@ -15,13 +14,13 @@ export class LoginComponent implements OnInit {
 	
 	@ViewChild(ErrorMessageComponent) errormessage!: ErrorMessageComponent;
 
-	constructor(private apiconnection: ApiconnectionService, private coreService: CoreService, private router: Router) { }
+	constructor(private coreService: CoreService, private router: Router) { }
 
 	ngOnInit(): void {
 	}
 	
 	submit(): void{
-		this.apiconnection.login(this.email, this.password, (accountId: number)=>{this.router.navigate(['']);}, (message: string)=>{this.onError(message)});
+		this.coreService.login(this.email, this.password, (accountId: number)=>{this.router.navigate(['']);}, (message: string)=>{this.onError(message)});
 	}
 	onError(message: string): void{
 		this.errormessage.popup(message);	

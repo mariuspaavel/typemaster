@@ -8,10 +8,10 @@ import { CoreService } from './core.service';
 })
 export class AppComponent {
   	title = 'typemaster';
-	constructor(coreservice: CoreService) {	
+	constructor(private coreService: CoreService) {	
 	}
 
 	ngOnInit(): void {
-
+		this.coreService.init();
 	}
 }

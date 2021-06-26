@@ -1,7 +1,7 @@
 CREATE OR REPLACE FUNCTION login(
-	asessionid INTEGER,
-	acontact VARCHAR(50),
-	apassword VARCHAR(32)
+	a_sessionid INTEGER,
+	a_email VARCHAR(50),
+	a_password VARCHAR(32)
 )
 RETURNS INTEGER
 LANGUAGE plpgsql
@@ -9,14 +9,14 @@ AS $$
 DECLARE
 	rec RECORD;
 BEGIN 
-	SELECT accountid, pwhash FROM accounts INTO rec WHERE contact=acontact;
+	SELECT accountid, pwhash FROM accounts INTO rec WHERE email=a_email;
 	IF NOT FOUND THEN
-		RAISE 'Email not found' USING ERRCODE='email_not_found';
+		RAISE 'Email not found';
 	END IF;
-	IF MD5(apassword) <> rec.pwhash THEN
-		RAISE 'Wrong password' USING ERRCODE='wrong_password';
+	IF MD5(a_password) <> rec.pwhash THEN
+		RAISE 'Wrong password';
 	END IF;
-	PERFORM adminlogin(asessionid, rec.accountid);
+	PERFORM adminlogin(a_sessionid, rec.accountid);
 	RETURN rec.accountid;
 END;
 $$;	

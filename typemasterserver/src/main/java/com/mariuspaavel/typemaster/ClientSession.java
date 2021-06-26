@@ -15,11 +15,12 @@ public class ClientSession{
 		return accountId;
 	}
 	public boolean isLoggedIn(){
-		return accountId != 0;
+		return accountId != -1;
 	}
 	public ClientSession(int sessionId, long sessionKey){
 		this.sessionId = sessionId;
 		this.sessionKey = sessionKey;
+		this.accountId = -1;
 	}
 	public void setAccountId(int accountId){
 		this.accountId = accountId;

@@ -12,30 +12,55 @@ public class JsonRequestHandler{
 	}
 	
 	
-	public Object handle(ClientSession session, Map<String, Object> jsonRequest) throws SQLException{
+	public Object handle(ClientSession session, Map<String, Object> jsonRequest) throws Exception{
 		String requestType = (String)jsonRequest.get("type");
 		DBC dbc = DBC.getInstance();		
 
 		switch(requestType){
-			case "regsubmit":
+			case "register":
 			{
 				String email = (String)jsonRequest.get("email");
 				String password = (String)jsonRequest.get("password");
-				return dbc.callFunction("regsubmit", session.getSessionId(), email, password);	
+				
+				if(!validEmail(email))scream("Invalid email");
+				if(!validPassword(password))scream("Invalid password");
+
+				return dbc.callFunction("register", session.getSessionId(), email, password);	
 			}	
-			case "register":
-			{
-				return dbc.callFunction("register", session.getSessionId());
-			}
 			case "login":
 			{
 				String email = (String)jsonRequest.get("email");
 				String password = (String)jsonRequest.get("password");
+				
+				if(!validEmail(email))scream("Invalid email");
+				if(!validPassword(password))scream("Invalid password");
+
 				return dbc.callFunction("login", session.getSessionId(),  email, password);
-			}	
+			}
+			case "logout":{
+				dbc.callFunction("logout", session.getSessionId());
+				return -1;
+			}
+			case "status":
+			{
+				return session.getAccountId();
+			}
 			default: throw new UnknownRequestException();
 		}
 		
+	}
+	private void scream(String message) throws Exception{
+		throw new Exception(message);
+	}
+
+	private boolean validEmail(String email){
+		if(email == null)return false;
+		if(email.length() < 5)return false;
+		else return true;
+	}	
+	private boolean validPassword(String password){
+		if(password.length() < 5)return false;
+		return true;
 	}
 
 }

@@ -1,11 +1,11 @@
 CREATE OR REPLACE FUNCTION adminlogin(
-	asessionid INTEGER,
-	aaccountid INTEGER
+	a_sessionid INTEGER,
+	a_accountid INTEGER
 )
 RETURNS void
 LANGUAGE plpgsql
 AS $$
 BEGIN
-	UPDATE sessions SET accountid=aaccountid WHERE sessionid=asessionid;
+	UPDATE sessions SET accountid=a_accountid WHERE sessionid=a_sessionid;
 END;
 $$;

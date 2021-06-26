@@ -49,7 +49,7 @@ public class JsonRequest extends HttpServlet{
 		Map<String, Object> output = new HashMap<String, Object>();
 		try{
 			Object result = JsonRequestHandler.getInstance().handle(session, (Map<String, Object>)input);
-			if(result != null)output.put("result", result);
+			if(result != null)output.put("payload", result);
 			output.put("type", "success");	
 		}catch(SQLException e){
 			e.printStackTrace(ds);
@@ -66,14 +66,14 @@ public class JsonRequest extends HttpServlet{
 			if(messageEndIndex == -1)messageEndIndex = fullMessage.length();
 			String trimmedMessage = fullMessage.substring(7, messageEndIndex);
 				
-			output.put("cause", trimmedMessage);
+			output.put("payload", trimmedMessage);
 		
 
 		}catch(Exception e){
 
 			e.printStackTrace(ds);
 			output.put("type", "fail");
-			output.put("message", e.getMessage());
+			output.put("payload", e.getMessage());
 
 		}
 		json.write(output, out);		

@@ -25,4 +25,11 @@ public class ClientSession{
 	public void setAccountId(int accountId){
 		this.accountId = accountId;
 	}
+	public Map<String, Object> toJson(){
+		Map<String, Object> result = new HashMap<>();
+		result.put("sessionId", sessionId);
+		result.put("sessionKey", sessionKey);
+		result.put("accountId", accountId)l
+		return result;
+	}
 }

@@ -19,68 +19,79 @@ public class JsonRequest extends HttpServlet{
 	}
 	public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
 		if(ds!=null)ds.println("Received http json request");
-		ClientSession session;
-	
-		BufferedInputStream is = new BufferedInputStream(request.getInputStream(), 8*1024);
-		InputStreamReader isr = new InputStreamReader(is);
-		Object input = null;
-	
-		input = json.read(isr);
-		
-		if(!(input instanceof Map))throw new RuntimeException("Wrong input type, must be a json map.");	
-	
-		try{
-			ds.println("Writing input to debug stream.");
-			json.write(input, ds);
-		}catch(IOException e){
-			ds.println("Couldn't print the input for debugging due to an IOException.");
-		}	
 
+		Map<String, Object> output = null;
+		BufferedOutputStream os = null;
+		PrintStream out = null;
 		try{
-			session = SessionManager.getInstance().authenticate(input, request, response);
+			os = new BufferedOutputStream(response.getOutputStream(), 8*1024);		
+			out = new PrintStream(os);
 		}catch(Exception e){
-			e.printStackTrace(ds);	
+			if(ds!=null){
+				ds.println("Failed request");
+				e.printStackTrace(ds);
+			}
 			return;
 		}
 
-	
-		BufferedOutputStream os = new BufferedOutputStream(response.getOutputStream(), 8*1024);		
-
-		PrintStream out = new PrintStream(os);
-
-		Map<String, Object> output = new HashMap<String, Object>();
 		try{
-			Object result = JsonRequestHandler.getInstance().handle(session, (Map<String, Object>)input);
+
+			SessionManager sm = SessionManager.getInstance();
+	
+			BufferedInputStream is = new BufferedInputStream(request.getInputStream(), 8*1024);
+			InputStreamReader isr = new InputStreamReader(is);
+			Map<String, Object> input = null;
+	
+			input = (Map<String, Object>)json.read(isr);
+		
+			ClientSession session = null;	
+			try{	
+				int sessionId = (int)((Long)input.get("sessionid")).longValue();
+				String sessionKey = (String)input.get("sessionkey");
+				session = SessionManager.getInstance().validate(sessionId, sessionKey);
+			}catch(Exception e){
+				e.printStackTrace(ds);
+				throw new AuthFailException();
+			}
+			if(session == null){
+				ds.println("Session was not found.");
+				throw new AuthFailException();
+			}
+				
+			Object result = JsonRequestHandler.getInstance().handle(session, input);
+			
+			output = new HashMap<>();
 			if(result != null)output.put("payload", result);
-			output.put("type", "success");	
-		}catch(SQLException e){
+			output.put("type", "success");
+		
+		}catch(AuthFailException e){
+			output = new HashMap<>();
+			output.put("type", "authfail");
+		}
+		catch(SQLException e){
 			e.printStackTrace(ds);
 
+			output = new HashMap<>();			
 			output.put("type", "fail");
-			/*
-			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-			PrintStream errorPrinter = new PrintStream(buffer);
-			e.printStackTrace(errorPrinter);
-			String errorPrintout = new String(buffer.toByteArray());
-			*/
+			
 			String fullMessage = e.getMessage();
 			int messageEndIndex = fullMessage.indexOf("\n");
 			if(messageEndIndex == -1)messageEndIndex = fullMessage.length();
 			String trimmedMessage = fullMessage.substring(7, messageEndIndex);
 				
 			output.put("payload", trimmedMessage);
-		
-
-		}catch(Exception e){
-
+		}		
+		catch(Exception e){
 			e.printStackTrace(ds);
+			output = new HashMap<>();
 			output.put("type", "fail");
 			output.put("payload", e.getMessage());
-
 		}
-		json.write(output, out);		
+		try{
+			json.write(output, out);		
+			os.flush();
+		}catch(Exception e){return;}
 
-		os.flush();
 	}
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
 		doPost(request, response);
@@ -88,36 +99,4 @@ public class JsonRequest extends HttpServlet{
 	public void destroy(){
 	
 	}
-
-	private ClientSession validate(String sessionId, String sessionKey)throws SQLException{		
-
-		String query = String.format("SELECT * FROM validate(%d, %d);", sessionId, sessionKey);
-		try(Statement stmt=DBC.getInstance().getConnection().createStatement(); ResultSet rs = stmt.executeQuery(query)){
-			if(!rs.next())return null;
-			ClientSession session = new ClientSession(sessionId, sessionKey);
-			session.setAccountId(rs.getInt("accountid"));
-			return true;
-		}
-	}
-	private void syncCookies(ClientSession session, HttpServletRequest request, HttpServletResponse response){
-		Cookie[] cookies = request.getCookies();
-		String readSessionId = null;
-		String readSessionKey = null;
-		if(cookies != null){
-			for(Cookie c : cookies){
-				if(c.getName().equals("sessionid"))readSessionId = c.getValue();
-				else if(e.getName().equals("sessionkey"))readSessionKey = c.getValue();
-			}
-		}
-		if(
-		readSessionId == null || 
-		readSessionKey == null ||
-		!readSessionId.equals(session.getSessionId()) ||
-		!readSessionKey.equals(session.getSessionKey())
-		){
-			response.setCookie(new Cookie("sessionid", session.getSessionId()));
-			response.setCookie(new Cookie("sessionKey", session.getSessionKey()));
-		}
-	}
-
 }

@@ -14,13 +14,14 @@ public class JsonRequestHandler{
 	
 	public Object handle(ClientSession session, Map<String, Object> jsonRequest) throws Exception{
 		String requestType = (String)jsonRequest.get("type");
+		Map<String, Object> args = (Map<String, Object>)jsonRequest.get("args");
 		DBC dbc = DBC.getInstance();		
 
 		switch(requestType){
 			case "register":
 			{
-				String email = (String)jsonRequest.get("email");
-				String password = (String)jsonRequest.get("password");
+				String email = (String)args.get("email");
+				String password = (String)args.get("password");
 				
 				if(!validEmail(email))scream("Invalid email");
 				if(!validPassword(password))scream("Invalid password");
@@ -29,8 +30,8 @@ public class JsonRequestHandler{
 			}	
 			case "login":
 			{
-				String email = (String)jsonRequest.get("email");
-				String password = (String)jsonRequest.get("password");
+				String email = (String)args.get("email");
+				String password = (String)args.get("password");
 				
 				if(!validEmail(email))scream("Invalid email");
 				if(!validPassword(password))scream("Invalid password");

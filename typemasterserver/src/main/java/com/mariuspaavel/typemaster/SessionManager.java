@@ -20,75 +20,52 @@ public class SessionManager {
 	private SessionManager(){
 	}	
 
-	PrintStream ds = System.out;
+	private PrintStream ds = System.out;
+	
 
-	public ClientSession authenticate(HttpServletRequest request, HttpServletResponse response)throws ServletException, SQLException{
-		
-		Cookie[] cookies = request.getCookies();
-		if(cookies == null){
-			return authReset(response);
-		}
 	
-		ClientSession clientSession = readFromCookies(cookies);
-		
-		if(!validate(clientSession)){
-			return authReset(response);
+	ClientSession validate(int sessionId, String sessionKey)throws SQLException{		
+
+		String query = String.format("SELECT * FROM validate(%d, '%s');", sessionId, sessionKey);
+		ds.println(query);
+		try(Statement stmt=DBC.getInstance().getConnection().createStatement(); ResultSet rs = stmt.executeQuery(query)){
+			if(!rs.next())return null;
+			ClientSession session = new ClientSession(sessionId, sessionKey);
+			session.setAccountId(rs.getInt("accountid"));
+			return session;
 		}
-		return clientSession;
-			
 	}
-	private ClientSession readFromCookies(Cookie[] cookies){
-	
-		Cookie sessionIdCookie = null;
-		Cookie sessionKeyCookie = null;
-		outer:for(Cookie c : cookies){
-			String name = c.getName();
-			switch(name){
-				case "sessionid": sessionIdCookie = c;
-				if(sessionKeyCookie != null)break outer;
-				break;
-				case "sessionkey": sessionKeyCookie = c;
-				if(sessionIdCookie != null)break outer;
-				break;
+	void syncCookies(ClientSession session, HttpServletRequest request, HttpServletResponse response){
+		Cookie[] cookies = request.getCookies();
+		Integer readSessionId = null;
+		String readSessionKey = null;
+		if(cookies != null){
+			for(Cookie c : cookies){
+				String value = c.getValue();
+				if(value == null)continue;
+				try{
+					if(c.getName().equals("sessionid"))readSessionId = new Integer(c.getValue());
+					else if(c.getName().equals("sessionkey"))readSessionKey = c.getValue();
+				}catch(NumberFormatException e){continue;}
 			}
 		}
-		int sessionId = Integer.parseInt(sessionIdCookie.getValue());
-		long sessionKey = Long.parseLong(sessionKeyCookie.getValue());
-		return new ClientSession(sessionId, sessionKey);
-	}
-	private boolean validate(ClientSession session)throws SQLException{
-	
-	
-		String query = String.format("SELECT * FROM validate(%d, %d);", session.getSessionId(), session.getSessionKey());
-		try(Statement stmt=DBC.getInstance().getConnection().createStatement(); ResultSet rs = stmt.executeQuery(query)){
-			if(!rs.next())return false;
-			session.setAccountId(rs.getInt("accountid"));
-			return true;
+		if(
+		readSessionId == null || 
+		readSessionKey == null ||
+		readSessionId != session.getSessionId() ||
+		readSessionKey != session.getSessionKey()
+		){
+			response.addCookie(new Cookie("sessionid", Integer.toString(session.getSessionId())));
+			response.addCookie(new Cookie("sessionKey", session.getSessionKey()));
 		}
 	}
-	
-	
-	private ClientSession authReset(HttpServletResponse response) throws SQLException{
-		if(ds != null)ds.println("Resetting session");
-		
-		ClientSession session = null;		
-
-		Cookie sessionIdCookie = null;
-		Cookie sessionKeyCookie = null;
-		
+	ClientSession createSession() throws SQLException{
 		try(Statement stmt = DBC.getInstance().getConnection().createStatement(); ResultSet rs = stmt.executeQuery("SELECT * FROM createsession();")){
 			rs.next();
 			int sessionId = rs.getInt("sessionid");
-			long sessionKey = rs.getLong("sessionkey");
+			String sessionKey = rs.getString("sessionkey");
 			
-			session = new ClientSession(sessionId, sessionKey);	
-			
-			sessionIdCookie = new Cookie("sessionid", Integer.toString(sessionId));
-			sessionKeyCookie = new Cookie("sessionkey", Long.toString(sessionKey));
+			return new ClientSession(sessionId, sessionKey);	
 		}
-	
-		response.addCookie(sessionIdCookie);
-		response.addCookie(sessionKeyCookie);
-		return session;
 	}
 }

@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION validate(
 	asessionid INTEGER,
-	asessionkey BIGINT
+	asessionkey VARCHAR(32)
 )
 RETURNS SETOF sessions
 LANGUAGE plpgsql

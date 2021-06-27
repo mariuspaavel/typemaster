@@ -18,29 +18,56 @@ public class GetSession extends HttpServlet{
 
 	}
 	public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
-		if(ds!=null)ds.println("Received getsession request");
 		
-		SessionManager sm = SessionManager.getInstance();		
-
-		String sessionId = null;
-		String sessionKey = null;
-
-		Cookie[] cookies = request.getCookies();
-		for(Cookie c : cookies){
-			if(c.getName().equals("sessionid"))sessionId = c.getValue();
-			else if(c.getName().equals("sessionkey"))sessionKey = c.getValue();
-		}	
-		ClientSession session = sm.validate(sessionId, sessionKey);	
-	
-		Map<String, Object> output = new HashMap<String, Object>();
+		Map<String, Object> output = null;
 		
-		output.put("type", "success")
-		output.put("payload", session.toJson());
+		try{
+			if(ds!=null)ds.println("Received getsession request");
+		
+			output = new HashMap<>();
+			
+			SessionManager sm = SessionManager.getInstance();		
+
+			Integer sessionId = null;
+			String sessionKey = null;
+
+		
+			cookiereader:try{
+				Cookie[] cookies = request.getCookies();
+				if(cookies == null)break cookiereader;
+				for(Cookie c : cookies){
+					String value = c.getValue();
+					if(value == null)continue;
+					if(c.getName().equals("sessionid"))sessionId = new Integer(c.getValue());
+					else if(c.getName().equals("sessionkey"))sessionKey = c.getValue();
+				}
+			}catch(Exception e){}
 	
-		BufferedOutputStream os = new BufferedOutputStream(response.getOutputStream(), 8*1024);		
-		PrintStream out = new PrintStream(os);
-		json.write(output, out);		
-		os.flush();
+			ClientSession session = null;
+			if(sessionId != null && sessionKey != null)session = sm.validate(sessionId, sessionKey);
+	
+			if(session == null)session = sm.createSession();		
+			sm.syncCookies(session, request, response);
+		
+			output.put("type", "success");
+			output.put("payload", session.toJson());
+	
+		
+		}catch(Exception e){
+			e.printStackTrace(ds);
+			output = new HashMap<>();
+			output.put("type", "fail");
+			output.put("payload", e.getMessage());	
+		}
+		try{
+			BufferedOutputStream os = new BufferedOutputStream(response.getOutputStream(), 8*1024);		
+			PrintStream out = new PrintStream(os);
+			json.write(output, out);		
+			os.flush();
+		}catch(Exception e){
+			e.printStackTrace(ds);
+			return;
+		}
 	}
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
 		doPost(request, response);

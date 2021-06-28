@@ -42,9 +42,31 @@ public class JsonRequestHandler{
 				dbc.callFunction("logout", session.getSessionId());
 				return -1;
 			}
-			case "status":
+			case "gettext":
 			{
-				return session.getAccountId();
+				return TextProvider.getInstance().getText();
+			}
+			case "insertrecord":
+			{
+				long timetaken = (Long)args.get("timetaken");
+				int keystrokes = (int)((Long)args.get("keystrokes")).longValue();
+				int misses = (int)((Long)args.get("misses")).longValue();
+				return dbc.callFunction("insertrecord", session.getAccountId(), timetaken, keystrokes, misses);
+			
+			}
+			case "getdailystatistics":{
+				final String query = "SELECT * FROM get_daily_statistics(?);";
+				try(PreparedStatement stmt = DBC.getInstance().getConnection().prepareStatement(query)){
+					stmt.setInt(1, session.getAccountId());
+					ResultSet rs = stmt.executeQuery();
+					if(!rs.next())throw new RuntimeException();
+					double averageSpeed = rs.getDouble("average_speed");
+					double averageErrors = rs.getDouble("average_errors");
+					Map<String, Object> result = new HashMap<>();
+					result.put("average_speed", averageSpeed);
+					result.put("average_errors", averageErrors);
+					return result;
+				}
 			}
 			default: throw new UnknownRequestException();
 		}

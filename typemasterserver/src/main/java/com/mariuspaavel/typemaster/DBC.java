@@ -50,14 +50,16 @@ public class DBC{
 		queryBuilder.append(name);
 		queryBuilder.append('(');
 		for(int i = 0; i < args.length; i++){
-			if(args[i] instanceof String)writeStringLiteral(queryBuilder, args[i]);
-			else queryBuilder.append(args[i].toString());
-			if(i != args.length-1)queryBuilder.append(", ");
+			queryBuilder.append("?");
+			if(i != args.length - 1)queryBuilder.append(", ");
 		}
 		queryBuilder.append(");");
-		String sql = queryBuilder.toString();
-		if(ds != null)ds.println(sql);
-		try(Statement stmt = c.createStatement(); ResultSet rs = stmt.executeQuery(sql)){
+
+		try(PreparedStatement stmt = c.prepareStatement(queryBuilder.toString())){
+			for(int i = 0; i < args.length; i++){
+				stmt.setObject(i+1, args[i]);
+			}			
+			ResultSet rs = stmt.executeQuery();
 			if(!rs.next())return null;
 			return rs.getObject(name);
 		}

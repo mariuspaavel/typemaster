@@ -8,7 +8,7 @@ DECLARE
 	stats daily_statistics;
 BEGIN
 	
-	SELECT AVG(keystrokes::REAL / timetaken * 60000 / 4), AVG(misses::REAL / keystrokes * 100) INTO stats.average_speed, stats.average_mistakes FROM records WHERE accountid=a_accountid;
+	SELECT AVG(keystrokes::REAL / timetaken * 60000 / 5), AVG(misses::REAL / keystrokes * 100) INTO stats.average_speed, stats.average_mistakes FROM records WHERE accountid=a_accountid;
 
 RETURN NEXT stats;
 END;

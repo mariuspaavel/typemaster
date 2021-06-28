@@ -61,7 +61,7 @@ public class JsonRequestHandler{
 					ResultSet rs = stmt.executeQuery();
 					if(!rs.next())throw new RuntimeException();
 					double averageSpeed = rs.getDouble("average_speed");
-					double averageErrors = rs.getDouble("average_errors");
+					double averageErrors = rs.getDouble("average_mistakes");
 					Map<String, Object> result = new HashMap<>();
 					result.put("average_speed", averageSpeed);
 					result.put("average_errors", averageErrors);

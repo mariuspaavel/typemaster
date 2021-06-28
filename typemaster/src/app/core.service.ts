@@ -8,7 +8,7 @@ import { Session } from './session.model';
   providedIn: 'root'
 })
 export class CoreService {
-	private rootUrl: string = "http://95.179.136.134/typemasterserver/";
+	private rootUrl: string = "https://mariuspaavel.com/typemasterserver/";
 
 	session: Session | null = null;
 

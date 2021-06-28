@@ -1,7 +1,8 @@
-import { Injectable } from '@angular/core';
+import { Injectable, EventEmitter } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Response } from './response.model';
 import { Session } from './session.model';
+
 
 @Injectable({
   providedIn: 'root'
@@ -11,12 +12,19 @@ export class CoreService {
 
 	session: Session | null = null;
 
-	constructor(private http: HttpClient) { }
+	public sessionLoaded$: EventEmitter<void>;
+
+	constructor(private http: HttpClient) {
+		this.sessionLoaded$ = new EventEmitter();
+	}
 	
 	init(): void{
 		this.getSession();
 	}	
 	getAccount() : number{
+		if(this.session == null){
+			return -1;
+		}
 		return (<Session>this.session).accountId;
 	}	
 		
@@ -26,6 +34,7 @@ export class CoreService {
 			console.log(response);
 			if((<Response>response).type === "success"){
 				this.session = <Session>(<Response>response).payload;
+				this.sessionLoaded$.emit();
 			}else{
 				
 			}
@@ -67,7 +76,28 @@ export class CoreService {
 			}
 		);	
 	}
-
+	
+	getText(onSuccess: (text: string)=>void, onFailure: (message: string)=>void){
+		this.jsonRequest("gettext", {},
+			(payload: any)=>{
+				onSuccess(<string>payload);
+			},
+			(message: string)=>{
+				onFailure(message);
+			}
+		);
+	}
+	
+	insertRecord(timetaken: number, keystrokes: number, misses: number, onSuccess: ()=>void, onFailure: (message: string)=>void){
+		this.jsonRequest("insertrecord", {timetaken:timetaken, keystrokes:keystrokes, misses:misses},
+			(payload: any)=>{
+				onSuccess();
+			},
+			(message: string)=>{
+				onFailure(message);
+			}
+		);
+	}
 	
 	jsonRequest(requestType: string, args: any, onSuccess: (payload: any)=>void, onFailure: (message: string) => void) : void{
 		this.http.post(this.rootUrl + 'jsonrequest', {type: requestType, sessionid: (<Session>this.session).sessionId, sessionkey: (<Session>this.session).sessionKey, args: args})

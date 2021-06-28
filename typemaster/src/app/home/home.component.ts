@@ -1,5 +1,6 @@
 import { Component, OnInit, HostListener} from '@angular/core';
-import {WindowChar} from './windowchar.model'
+import {WindowChar} from './windowchar.model';
+import { CoreService } from '../core.service';
 
 @Component({
   selector: 'app-home',
@@ -16,6 +17,9 @@ export class HomeComponent implements OnInit {
 	roundStart: number = 0;
 	roundEnd: number = 0;
 
+	keyStrokes: number = 0;
+	misses: number = 0;
+
 	lastBlock: number= 0;
 	blocked: boolean = false;
 
@@ -27,7 +31,8 @@ export class HomeComponent implements OnInit {
 	correct = new Audio("/assets/correct.wav");
 	wrong = new Audio("/assets/wrong.wav");
 
-	constructor() {	
+	constructor(private coreService: CoreService) {
+		coreService.sessionLoaded$.subscribe(()=>{this.requestNextRound();});	
 	}
 
 	ngOnInit(): void {
@@ -41,16 +46,14 @@ export class HomeComponent implements OnInit {
 	}
 	
 	requestNextRound() : void{
-		console.log("Requesting next round");
-		this.roundEnd = Date.now();
-		this.calculateWpm();
-		var me = this;
-		var xhr = new XMLHttpRequest();
-		xhr.open("GET", "/keyboardwarrior/next", true);
-		xhr.onload = function(e){
-			me.startNewRound(xhr.responseText);
-		}
-		xhr.send();
+		
+		this.coreService.getText(
+			(text: string)=>{
+				this.startNewRound(text);
+			},
+			(message: string)=>{}
+		);	
+		
 	}
 
 	maxLineLength: number = 30;
@@ -58,6 +61,13 @@ export class HomeComponent implements OnInit {
 	startNewRound(content: string) : void{
 		this.chars = [];
 		this.loadString(content);
+		
+		this.keyStrokes = 0; 
+		this.misses = 0;
+
+		this.roundStart = new Date().getTime();
+
+
 	this.cursorpos = 0;
 		for(var i = 0, row = 0, column = 0; i < this.chars.length; i++, column++){
 			this.chars[i].row = row;
@@ -78,7 +88,8 @@ export class HomeComponent implements OnInit {
 		}
 	}
 	
-	calculateWpm(){
+	calculateWpm() : void{
+		console.log("Calculating wpm");
 		this.wpm = this.chars.length / 5 / (this.roundEnd - this.roundStart) * 60000;
 	}
 
@@ -90,6 +101,8 @@ export class HomeComponent implements OnInit {
 		if(this.cursorpos >= this.chars.length)return;		
 		if(this.blocked)return;
 		
+		this.keyStrokes++;
+
 		if(this.cursorpos === 0 && this.chars[0].state === 0)this.roundStart = Date.now();		
 
 		if(this.chars[this.cursorpos].value === c){	//If the expected matches the typed character
@@ -99,14 +112,14 @@ export class HomeComponent implements OnInit {
 			
 			this.cursorpos++;
 			
-			if(this.cursorpos >= this.chars.length)this.requestNextRound();
+			if(this.cursorpos >= this.chars.length)this.endRound();
 			
 			this.correct.pause();
 			this.correct.currentTime = 0;
 			this.correct.play();
 			
 		}else{ 	//Checks if the user has mistakenly skipped characters
-			
+			this.misses++;
 			this.wrong.play();
 			this.lastBlock = Date.now();
 			this.blocked = true;
@@ -120,12 +133,26 @@ export class HomeComponent implements OnInit {
 					}
 					this.chars[i].state = 1;
 					this.cursorpos = i+1;
-					if(this.cursorpos >= this.chars.length)this.requestNextRound();
+					if(this.cursorpos >= this.chars.length){
+						this.endRound();
+					}
 					return;
 				}
 			}
 			this.chars[this.cursorpos].state = 2;
 		}
+	}
+	endRound(): void{
+		this.roundEnd = new Date().getTime();
+		this.coreService.insertRecord(
+			this.roundEnd-this.roundStart, 
+			this.keyStrokes, 
+			this.misses, 
+			()=>{}, 
+			(message)=>{}
+		);
+		this.calculateWpm();
+		this.requestNextRound();
 	}
 
 }

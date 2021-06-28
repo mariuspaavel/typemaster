@@ -1,16 +1,16 @@
-<div [style.background-color]="this.blocked ? '#FAA' : '#FFF'">
-<div class="typewindow"
-[style.height]="(this.chars[this.chars.length-1].row * 2 + 8) + 'rem'"
->
-<p class="wpm">WPM: {{getFormattedWpm()}}</p>
-<p
-class="char"
-*ngFor="let char of chars; index as i"
-[style.left]="4+char.column + 'rem'"
-[style.top]="4+char.row * 2 + 'rem'"
-[style.background-color]="cursorpos==i ? '#000' : '#00000000'"
-[style.color]="char.getColor(cursorpos===i, this.blocked)"
->
-{{char.value === ' ' ? '_' : char.value}}</p>
-</div>
+<div class="screen" [style.background-color]="blocked ? '#FAA' : '#FFF'">
+	<div class="typewindow"
+		[style.height]="((this.chars.length > 0 ? this.chars[this.chars.length-1].row : 0) * 2 + 8) + 'rem'"
+	>
+		<p class="wpm">WPM: {{getFormattedWpm()}}</p>
+		<p
+			class="char"
+			*ngFor="let char of chars; index as i"
+			[style.left]="4+char.column + 'rem'"
+			[style.top]="4+char.row * 2 + 'rem'"
+			[style.background-color]="cursorpos==i ? '#000' : '#00000000'"
+			[style.color]="char.getColor(cursorpos===i, this.blocked)"
+		>
+		{{char.value === ' ' ? '_' : char.value}}</p>
+	</div>
 </div>

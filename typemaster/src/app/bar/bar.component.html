@@ -1,4 +1,4 @@
-<div class="bar">
+
 	<div *ngIf="loggedIn(); then thenBlock else elseBlock"></div>
 	<ng-template #thenBlock>
 		<button (click)="logout()">Logout</button>
@@ -8,4 +8,3 @@
 		<button (click)="register()">Register</button>
 	</ng-template>
 	
-</div>

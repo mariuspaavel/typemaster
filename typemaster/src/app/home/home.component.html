@@ -2,7 +2,11 @@
 	<div class="typewindow"
 		[style.height]="((this.chars.length > 0 ? this.chars[this.chars.length-1].row : 0) * 2 + 8) + 'rem'"
 	>
-		<p class="wpm">WPM: {{getFormattedWpm()}}</p>
+		<p class="metric wpm">WPM: {{wpm | number:'1.0-0'}}</p>
+		<p *ngIf="isLoggedIn()" class="metric avg">AVG: {{averageSpeed | number:'1.0-0'}}</p>
+		<p class="metric err">ERR: {{errors | number:'1.0-0'}}</p>
+		<p *ngIf="isLoggedIn()" class="metric avgerr">AVGERR: {{averageErrors | number:'1.0-0'}}</p>
+
 		<p
 			class="char"
 			*ngFor="let char of chars; index as i"

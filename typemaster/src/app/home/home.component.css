@@ -23,11 +23,27 @@
 	top: 50%;
 	transform: translate(0, -50%);
 }
-.wpm{
+.metric{
 	position: absolute;
 	margin: 0;
 	padding: 0;
-	top: -5rem;
-	left: 3rem;
 	text-size: 3rem;
 }
+.wpm{
+	top: -7.5rem;
+	left: 3rem;
+}
+.err{
+	top: -5rem;
+	left: 3rem;
+}
+.avg{
+	top: -7.5rem;
+	right: 3rem;
+}
+
+.avgerr{
+	top: -5rem;
+	right: 3rem;
+}
+

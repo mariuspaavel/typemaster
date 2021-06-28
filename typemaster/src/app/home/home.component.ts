@@ -1,6 +1,7 @@
 import { Component, OnInit, HostListener} from '@angular/core';
-import {WindowChar} from './windowchar.model';
+import { WindowChar } from './windowchar.model';
 import { CoreService } from '../core.service';
+import { Session } from '../session.model';
 
 @Component({
   selector: 'app-home',
@@ -24,19 +25,24 @@ export class HomeComponent implements OnInit {
 	blocked: boolean = false;
 
 	wpm: number = 0;	
-	getFormattedWpm() : string{
-		return Math.round(this.wpm).toString();
-	}	
+	errors: number = 0;
+
+	averageSpeed: number = 0;
+	averageErrors: number = 0;	
 	
 	correct = new Audio("/assets/correct.wav");
 	wrong = new Audio("/assets/wrong.wav");
 
 	constructor(private coreService: CoreService) {
-		coreService.sessionLoaded$.subscribe(()=>{this.requestNextRound();});	
+		this.coreService.sessionLoaded$.subscribe(()=>{this.requestNextRound();});	
 	}
 
 	ngOnInit(): void {
-		this.requestNextRound();
+		if(this.coreService.session != null)this.requestNextRound();
+	}
+
+	isLoggedIn(): boolean{
+		return this.coreService.getAccount() != -1;
 	}
 
 	loadString(content: string) : void{
@@ -54,6 +60,17 @@ export class HomeComponent implements OnInit {
 			(message: string)=>{}
 		);	
 		
+		if(this.isLoggedIn())this.coreService.getDailyStatistics(
+			(averageSpeed: number, averageErrors: number)=>{
+				this.averageSpeed = averageSpeed;
+				this.averageErrors = averageErrors;
+				console.log(this.averageSpeed);
+				console.log(this.averageErrors);
+			},
+			(message: string)=>{
+
+			}
+		);
 	}
 
 	maxLineLength: number = 30;
@@ -68,7 +85,7 @@ export class HomeComponent implements OnInit {
 		this.roundStart = new Date().getTime();
 
 
-	this.cursorpos = 0;
+		this.cursorpos = 0;
 		for(var i = 0, row = 0, column = 0; i < this.chars.length; i++, column++){
 			this.chars[i].row = row;
 			this.chars[i].column = column;
@@ -144,7 +161,7 @@ export class HomeComponent implements OnInit {
 	}
 	endRound(): void{
 		this.roundEnd = new Date().getTime();
-		this.coreService.insertRecord(
+		if(this.isLoggedIn())this.coreService.insertRecord(
 			this.roundEnd-this.roundStart, 
 			this.keyStrokes, 
 			this.misses, 
@@ -152,6 +169,7 @@ export class HomeComponent implements OnInit {
 			(message)=>{}
 		);
 		this.calculateWpm();
+		this.errors = this.misses;
 		this.requestNextRound();
 	}
 

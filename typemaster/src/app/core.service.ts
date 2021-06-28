@@ -98,6 +98,22 @@ export class CoreService {
 			}
 		);
 	}
+
+	getDailyStatistics(onSuccess: (averageSpeed: number, averageErrors: number)=>void, onFailure: (message: string)=>void){
+		this.jsonRequest("getdailystatistics", {},
+			(payload: any)=>{
+				interface dailyStatistics{
+					average_speed: number;
+					average_errors: number;
+				}
+				let stats: dailyStatistics = <dailyStatistics>payload;
+				onSuccess(stats.average_speed, stats.average_errors);
+			},
+			(message: string)=>{
+				onFailure(message);
+			}
+		);
+	}
 	
 	jsonRequest(requestType: string, args: any, onSuccess: (payload: any)=>void, onFailure: (message: string) => void) : void{
 		this.http.post(this.rootUrl + 'jsonrequest', {type: requestType, sessionid: (<Session>this.session).sessionId, sessionkey: (<Session>this.session).sessionKey, args: args})

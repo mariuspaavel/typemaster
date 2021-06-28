@@ -1,0 +1,19 @@
+CREATE TABLE records(
+	accountid
+		INTEGER 
+		REFERENCES accounts(accountid)
+		NOT NULL,
+	timestamp 
+		BIGINT 
+		NOT NULL 
+		DEFAULT extract(epoch FROM now()) * 1000,
+	timetaken 
+		BIGINT 
+		NOT NULL,
+	keystrokes 
+		INTEGER 
+		NOT NULL,
+	misses 
+		INTEGER 
+		NOT NULL
+)

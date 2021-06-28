@@ -1,0 +1,10 @@
+CREATE OR REPLACE FUNCTION logout(
+	a_sessionid INTEGER
+)
+RETURNS void
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	UPDATE sessions SET accountid=NULL WHERE sessionid=a_sessionid;
+END;
+$$;

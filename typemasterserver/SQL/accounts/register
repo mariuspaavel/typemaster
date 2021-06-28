@@ -1,27 +1,18 @@
 CREATE OR REPLACE FUNCTION register(
-	asessionid INTEGER
+	a_sessionid INTEGER, a_email VARCHAR(50), a_password VARCHAR(32)
 )
 RETURNS INTEGER
 LANGUAGE plpgsql
 AS $$
 DECLARE
-	abirth BIGINT;
-	acontact VARCHAR(50);
-	aname VARCHAR(20);
-	agender VARCHAR(1);
-	apassword VARCHAR(32);
-	hash VARCHAR(32);
-	aaccountid INTEGER;	
+	_hash VARCHAR(32);
+	_accountid INTEGER;	
 
 BEGIN
-	IF EXISTS (SELECT 1 FROM accounts WHERE contact=acontact) THEN
-		RAISE 'Contact occupied' USING ERRCODE='contact_occupied';
+	IF EXISTS (SELECT 1 FROM accounts WHERE email=a_email) THEN
+		RAISE 'Email occupied';
 	END IF;
-	SELECT birth, contact, name, gender, password INTO abirth, acontact, aname, agender, apassword FROM regforms WHERE sessionid=asessionid;	
-	hash := MD5(apassword);
-	INSERT INTO accounts(birth, contact, name, gender, pwhash) VALUES (abirth, acontact, aname, agender, hash) RETURNING accountid INTO aaccountid;
-	DELETE FROM regforms WHERE sessionid = asessionid;
-	RETURN aaccountid;
+	_hash := MD5(a_password);
+	INSERT INTO accounts(email, pwhash) VALUES (a_email, _hash) RETURNING accountid INTO _accountid;
+	RETURN _accountid;
 END; $$;
-
-

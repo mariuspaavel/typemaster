@@ -19,66 +19,79 @@ public class JsonRequest extends HttpServlet{
 	}
 	public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
 		if(ds!=null)ds.println("Received http json request");
-		ClientSession session;
+
+		Map<String, Object> output = null;
+		BufferedOutputStream os = null;
+		PrintStream out = null;
 		try{
-			session = SessionManager.getInstance().authenticate(request, response);
+			os = new BufferedOutputStream(response.getOutputStream(), 8*1024);		
+			out = new PrintStream(os);
 		}catch(Exception e){
-			e.printStackTrace(ds);	
+			if(ds!=null){
+				ds.println("Failed request");
+				e.printStackTrace(ds);
+			}
 			return;
 		}
-		BufferedInputStream is = new BufferedInputStream(request.getInputStream(), 8*1024);
-		InputStreamReader isr = new InputStreamReader(is);
-	
-		BufferedOutputStream os = new BufferedOutputStream(response.getOutputStream(), 8*1024);		
 
-		PrintStream out = new PrintStream(os);
+		try{
 
-		Object input = null;
+			SessionManager sm = SessionManager.getInstance();
 	
-		input = json.read(isr);
+			BufferedInputStream is = new BufferedInputStream(request.getInputStream(), 8*1024);
+			InputStreamReader isr = new InputStreamReader(is);
+			Map<String, Object> input = null;
+	
+			input = (Map<String, Object>)json.read(isr);
 		
-		if(!(input instanceof Map))throw new RuntimeException("Wrong input type, must be a json map.");	
-	
-		try{
-			ds.println("Writing input to debug stream.");
-			json.write(input, ds);
-		}catch(IOException e){
-			ds.println("Couldn't print the input for debugging due to an IOException.");
-		}	
-
-		Map<String, Object> output = new HashMap<String, Object>();
-		try{
-			Object result = JsonRequestHandler.getInstance().handle(session, (Map<String, Object>)input);
-			if(result != null)output.put("result", result);
-			output.put("responsestatus", "success");	
-		}catch(SQLException e){
+			ClientSession session = null;	
+			try{	
+				int sessionId = (int)((Long)input.get("sessionid")).longValue();
+				String sessionKey = (String)input.get("sessionkey");
+				session = SessionManager.getInstance().validate(sessionId, sessionKey);
+			}catch(Exception e){
+				e.printStackTrace(ds);
+				throw new AuthFailException();
+			}
+			if(session == null){
+				ds.println("Session was not found.");
+				throw new AuthFailException();
+			}
+				
+			Object result = JsonRequestHandler.getInstance().handle(session, input);
+			
+			output = new HashMap<>();
+			if(result != null)output.put("payload", result);
+			output.put("type", "success");
+		
+		}catch(AuthFailException e){
+			output = new HashMap<>();
+			output.put("type", "authfail");
+		}
+		catch(SQLException e){
 			e.printStackTrace(ds);
 
-			output.put("responsestatus", "fail");
-			/*
-			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-			PrintStream errorPrinter = new PrintStream(buffer);
-			e.printStackTrace(errorPrinter);
-			String errorPrintout = new String(buffer.toByteArray());
-			*/
+			output = new HashMap<>();			
+			output.put("type", "fail");
+			
 			String fullMessage = e.getMessage();
 			int messageEndIndex = fullMessage.indexOf("\n");
 			if(messageEndIndex == -1)messageEndIndex = fullMessage.length();
 			String trimmedMessage = fullMessage.substring(7, messageEndIndex);
 				
-			output.put("cause", trimmedMessage);
-		
-
-		}catch(Exception e){
-
+			output.put("payload", trimmedMessage);
+		}		
+		catch(Exception e){
 			e.printStackTrace(ds);
-			output.put("responsestatus", "fail");
-			output.put("cause", e.getMessage());
-
+			output = new HashMap<>();
+			output.put("type", "fail");
+			output.put("payload", e.getMessage());
 		}
-		json.write(output, out);		
+		try{
+			json.write(output, out);		
+			os.flush();
+		}catch(Exception e){return;}
 
-		os.flush();
 	}
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
 		doPost(request, response);
@@ -86,5 +99,4 @@ public class JsonRequest extends HttpServlet{
 	public void destroy(){
 	
 	}
-
 }

@@ -1,0 +1,13 @@
+CREATE OR REPLACE FUNCTION insertrecord(
+	a_accountid INTEGER, a_timetaken BIGINT, a_keystrokes INTEGER, a_misses INTEGER
+)
+RETURNS VOID
+LANGUAGE plpgsql
+AS $$
+DECLARE
+	_hash VARCHAR(32);
+	_accountid INTEGER;	
+
+BEGIN
+	INSERT INTO records(accountid, timetaken, keystrokes, misses) VALUES (a_accountid, a_timetaken, a_keystrokes, a_misses);
+END; $$;

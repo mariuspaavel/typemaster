@@ -1,0 +1,4 @@
+CREATE TYPE daily_statistics AS (
+	average_speed REAL,
+	average_mistakes REAL
+)

@@ -12,83 +12,78 @@ public class JsonRequestHandler{
 	}
 	
 	
-	public Object handle(ClientSession session, Map<String, Object> jsonRequest) throws SQLException{
-		String requestType = (String)jsonRequest.get("requesttype");
+	public Object handle(ClientSession session, Map<String, Object> jsonRequest) throws Exception{
+		String requestType = (String)jsonRequest.get("type");
+		Map<String, Object> args = (Map<String, Object>)jsonRequest.get("args");
 		DBC dbc = DBC.getInstance();		
 
 		switch(requestType){
-			case "submitage":
-			{
-				long birth = ((Long)jsonRequest.get("birth")).longValue();
-				return dbc.callFunction("submitbirth", session.getSessionId(), birth);	
-			}
-			case "submitcontact":
-			{
-				String contact = (String)jsonRequest.get("contact");
-				return dbc.callFunction("submitcontact", session.getSessionId(), contact);
-			}
-			case "submitnameandgender":
-			{
-				String name = (String)jsonRequest.get("name");
-				String gender = (String)jsonRequest.get("gender");
-				return dbc.callFunction("submitnameandgender", session.getSessionId(), name, gender);
-			}
-			case "submitpassword":
-			{			
-				String password = (String)jsonRequest.get("password");
-				return dbc.callFunction("submitpassword", session.getSessionId(), password);
-			}
 			case "register":
 			{
-				return dbc.callFunction("register", session.getSessionId());
-			}
-			case "getcovers":
+				String email = (String)args.get("email");
+				String password = (String)args.get("password");
+				
+				if(!validEmail(email))scream("Invalid email");
+				if(!validPassword(password))scream("Invalid password");
+
+				return dbc.callFunction("register", session.getSessionId(), email, password);	
+			}	
+			case "login":
 			{
-				int accountid = (Integer)jsonRequest.get("accountid");
-				List<Map<String, Object>> covers = new ArrayList<Map<String, Object>>();
-				String query = String.format("SELECT * FROM getcovers(%d)",accountid);
-				try(Statement stmt = dbc.getConnection().createStatement(); ResultSet rs = stmt.executeQuery(query)){
-					Map<String, Object> cover = new HashMap<String, Object>();
-					while(rs.next()){
-						cover.put("coverid", rs.getInt("coverid"));
-						cover.put("mediaid", rs.getInt("mediaid"));
-						cover.put("position", rs.getInt("position"));
-						covers.add(cover);
-					}
+				String email = (String)args.get("email");
+				String password = (String)args.get("password");
+				
+				if(!validEmail(email))scream("Invalid email");
+				if(!validPassword(password))scream("Invalid password");
+
+				return dbc.callFunction("login", session.getSessionId(),  email, password);
+			}
+			case "logout":{
+				dbc.callFunction("logout", session.getSessionId());
+				return -1;
+			}
+			case "gettext":
+			{
+				return TextProvider.getInstance().getText();
+			}
+			case "insertrecord":
+			{
+				long timetaken = (Long)args.get("timetaken");
+				int keystrokes = (int)((Long)args.get("keystrokes")).longValue();
+				int misses = (int)((Long)args.get("misses")).longValue();
+				return dbc.callFunction("insertrecord", session.getAccountId(), timetaken, keystrokes, misses);
+			
+			}
+			case "getdailystatistics":{
+				final String query = "SELECT * FROM get_daily_statistics(?);";
+				try(PreparedStatement stmt = DBC.getInstance().getConnection().prepareStatement(query)){
+					stmt.setInt(1, session.getAccountId());
+					ResultSet rs = stmt.executeQuery();
+					if(!rs.next())throw new RuntimeException();
+					double averageSpeed = rs.getDouble("average_speed");
+					double averageErrors = rs.getDouble("average_mistakes");
+					Map<String, Object> result = new HashMap<>();
+					result.put("average_speed", averageSpeed);
+					result.put("average_errors", averageErrors);
+					return result;
 				}
-				return covers;
-			}
-			case "addcover": 
-			{
-				int mediaId = (Integer)jsonRequest.get("mediaid");
-				return dbc.callFunction("addcover", session.getAccountId(), mediaId);
-			}
-			case "deletecover":
-			{
-				int coverId = (Integer)jsonRequest.get("coverid");
-				return dbc.callFunction("deletecover", session.getAccountId(), coverId);
-			}
-			case "getswipes":
-			{
-				String query = String.format("SELECT * FROM getswipes(%d)", session.getAccountId());
-				List<Map<String, Object>> results = new ArrayList<Map<String, Object>>();
-				try(Statement stmt = dbc.getConnection().createStatement(); ResultSet rs = stmt.executeQuery(query)){
-					Map<String, Object> currentAccount = new HashMap<String, Object>();
-					while(rs.next()){
-						currentAccount.put("accountid", rs.getInt("accountid"));
-						currentAccount.put("name", rs.getString("name"));
-						currentAccount.put("birth", rs.getLong("birth"));
-						currentAccount.put("gender", rs.getString("gender"));
-						currentAccount.put("bio", rs.getInt("bio"));
-						results.add(currentAccount);
-					}
-				}
-		
-				//return dbc.callFunction("getswipes", session.getAccountId());		
 			}
 			default: throw new UnknownRequestException();
 		}
 		
+	}
+	private void scream(String message) throws Exception{
+		throw new Exception(message);
+	}
+
+	private boolean validEmail(String email){
+		if(email == null)return false;
+		if(email.length() < 5)return false;
+		else return true;
+	}	
+	private boolean validPassword(String password){
+		if(password.length() < 5)return false;
+		return true;
 	}
 
 }

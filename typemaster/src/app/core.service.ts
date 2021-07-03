@@ -2,7 +2,8 @@ import { Injectable, EventEmitter } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Response } from './response.model';
 import { Session } from './session.model';
-
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { SocialAuthService, GoogleLoginProvider, FacebookLoginProvider, SocialUser } from 'angularx-social-login';
 
 @Injectable({
   providedIn: 'root'
@@ -14,12 +15,18 @@ export class CoreService {
 
 	public sessionLoaded$: EventEmitter<void>;
 
-	constructor(private http: HttpClient) {
+	constructor(private http: HttpClient, private socialAuthService: SocialAuthService) {
 		this.sessionLoaded$ = new EventEmitter();
+		this.sessionLoaded$.subscribe(()=>{
+			this.socialAuthService.authState.subscribe((user : any) => {
+    				if(user == null)return;
+				this.socialLoginSubmit(<SocialUser>user, (accountId: number)=>{}, (message: string)=>{});
+  			});
+		});
 	}
 	
 	init(): void{
-		this.getSession();
+		this.getSession();	
 	}	
 	getAccount() : number{
 		if(this.session == null){
@@ -36,7 +43,7 @@ export class CoreService {
 				this.session = <Session>(<Response>response).payload;
 				this.sessionLoaded$.emit();
 			}else{
-				
+						
 			}
 		});
 
@@ -53,7 +60,19 @@ export class CoreService {
 			}
 		);	
 	}
-
+	
+	socialLoginSubmit(user: SocialUser, onSuccess: (accountId: number)=>void, onFailure: (message: string)=>void): void{
+		this.jsonRequest("sociallogin", user,
+			(payload: any)=>{
+				(<Session>this.session).accountId = <number>payload;
+				onSuccess((<Session>this.session).accountId);
+			},
+			(message: string)=>{
+				onFailure(message);
+			}
+		);	
+	}
+	
 	register(email : string, password : string, onSuccess: (accountId:number)=>void, onFailure: (message: string)=>void): void{
 		this.jsonRequest("register", {email: email, password: password}, 
 			(payload: any)=>{
@@ -124,6 +143,23 @@ export class CoreService {
 			}else{
 				onFailure(<string>((<Response>response).payload));
 			}
+		},
+		err=>{
+			if (err.error instanceof Error) {
+         			 // A client-side or network error occurred. Handle it accordingly.
+          			console.error('An error occurred:', err.error.message);
+        		} else {
+          			// The backend returned an unsuccessful response code.
+       				// The response body may contain clues as to what went wrong,
+          			console.error(`Backend returned code ${err.status}, body was: ${err.error}`);
+       			}
 		});
+	}
+	googleLogin(): void{
+		this.socialAuthService.signIn(GoogleLoginProvider.PROVIDER_ID)
+
+	}
+	facebookLogin(): void{
+		this.socialAuthService.signIn(FacebookLoginProvider.PROVIDER_ID);	
 	}	
 }

@@ -1,0 +1,6 @@
+npm install -g npm-check-updates
+/after install run following:
+ncu -u
+
+//Then this:
+npm update

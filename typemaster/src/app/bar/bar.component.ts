@@ -20,6 +20,12 @@ export class BarComponent implements OnInit {
 	login(): void{
 		this.router.navigate(['/login']);
 	}
+	googleLogin(): void{
+		this.coreService.googleLogin();
+	}
+	facebookLogin(): void{
+		this.coreService.facebookLogin();
+	}
 	register(): void{
 		this.router.navigate(['/register']);	
 	}

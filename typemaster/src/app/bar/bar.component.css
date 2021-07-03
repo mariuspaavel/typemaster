@@ -20,3 +20,10 @@ button{
 	border-color: black;
 	font-family: inherit;
 }
+button > img{
+	width: 1.6rem;
+	height: 1.6rem;
+	position: relative;
+	top: 0.15rem;
+}
+
